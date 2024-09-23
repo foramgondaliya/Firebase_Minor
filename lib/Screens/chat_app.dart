@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_chat_app/helper/Auth_Helper.dart';
-import 'package:firebase_chat_app/helper/fcm_notification_helper.dart';
 import 'package:firebase_chat_app/helper/firebase_helper.dart';
 import 'package:flutter/material.dart';
 
@@ -41,13 +40,36 @@ class _ChatAppState extends State<ChatApp> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.blue,
+        elevation: 0,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(20),
+          ),
+        ),
         toolbarHeight: 100,
-        title: (receiverEmail['email'] ==
-                Auth_Helper.firebaseAuth.currentUser!.email)
-            ? const Text("Chat Page\nYourself")
-            : Text(
-                "Chat Page\n${receiverEmail['email']}",
-              ),
+        title: Row(
+          children: [
+            CircleAvatar(
+              backgroundImage: NetworkImage('assets/image/img.jpg'),
+              radius: 25,
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  receiverEmail['email'],
+                  style: const TextStyle(
+                    color: Colors.black54,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
       body: Column(
         children: [
@@ -83,155 +105,192 @@ class _ChatAppState extends State<ChatApp> {
 
                           return (allMessages.isEmpty)
                               ? const Center(
-                                  child: Text("No any Messages"),
+                                  child: Text("No messages"),
                                 )
                               : ListView.builder(
                                   reverse: true,
                                   itemCount: allMessages.length,
                                   itemBuilder: (context, i) {
-                                    return Row(
-                                      mainAxisAlignment:
-                                          (receiverEmail['email'] !=
-                                                  allMessages[i]
-                                                      .data()['receiverEmail'])
-                                              ? MainAxisAlignment.start
-                                              : MainAxisAlignment.end,
-                                      children: [
-                                        (receiverEmail['email'] !=
-                                                allMessages[i]
-                                                    .data()['receiverEmail'])
-                                            ? Chip(
-                                                label: Text(
-                                                    "${allMessages[i].data()['msg']}"),
-                                              )
-                                            : PopupMenuButton<String>(
-                                                onSelected: (val) async {
-                                                  if (val == 'delete') {
-                                                    return showDialog(
-                                                      context: context,
-                                                      builder: (context) {
-                                                        return AlertDialog(
-                                                          title: const Text(
-                                                            "Are you sure",
+                                    bool isSender = receiverEmail['email'] !=
+                                        allMessages[i].data()['receiverEmail'];
+                                    return Align(
+                                      alignment: isSender
+                                          ? Alignment.centerLeft
+                                          : Alignment.centerRight,
+                                      child: Container(
+                                        margin: const EdgeInsets.symmetric(
+                                          vertical: 5,
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 10,
+                                          horizontal: 15,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: isSender
+                                              ? Colors.white
+                                              : Colors.blue.shade100,
+                                          borderRadius: BorderRadius.circular(
+                                            15,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.grey.withOpacity(
+                                                  0.3), // Soft shadow effect
+                                              blurRadius: 5,
+                                              offset: Offset(0, 3),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment: isSender
+                                              ? CrossAxisAlignment.start
+                                              : CrossAxisAlignment.end,
+                                          children: [
+                                            PopupMenuButton<String>(
+                                              onSelected: (val) async {
+                                                if (val == 'delete') {
+                                                  return showDialog(
+                                                    context: context,
+                                                    builder: (context) {
+                                                      return AlertDialog(
+                                                        title: const Text(
+                                                          "Detete Message?",
+                                                        ),
+                                                        content: Text(
+                                                            "Are you Sure you want to delete message?"),
+                                                        actions: [
+                                                          ElevatedButton(
+                                                            onPressed: () {
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                            },
+                                                            child: const Text(
+                                                                "Cancel"),
                                                           ),
-                                                          actions: [
-                                                            ElevatedButton(
-                                                              onPressed: () {
-                                                                Navigator.of(
-                                                                        context)
-                                                                    .pop();
-                                                              },
-                                                              child: const Text(
-                                                                  "Cancel"),
-                                                            ),
-                                                            ElevatedButton(
-                                                              onPressed: () {
-                                                                FireStoreHelper.fireStoreHelper.deleteMessage(
-                                                                    receiverEmail:
-                                                                        receiverEmail[
-                                                                            'email'],
-                                                                    mesaageDocId:
-                                                                        allMessages[i]
-                                                                            .id);
-                                                                Navigator.of(
-                                                                        context)
-                                                                    .pop();
-                                                              },
-                                                              child: const Text(
-                                                                  "Delete"),
-                                                            ),
-                                                          ],
-                                                        );
-                                                      },
-                                                    );
-                                                  }
-                                                  if (val == 'edit') {
-                                                    return showDialog(
-                                                      context: context,
-                                                      builder: (context) {
-                                                        return AlertDialog(
-                                                          title: const Text(
-                                                            "Edit Message",
+                                                          ElevatedButton(
+                                                            onPressed: () {
+                                                              FireStoreHelper
+                                                                  .fireStoreHelper
+                                                                  .deleteMessage(
+                                                                receiverEmail:
+                                                                    receiverEmail[
+                                                                        'email'],
+                                                                mesaageDocId:
+                                                                    allMessages[
+                                                                            i]
+                                                                        .id,
+                                                              );
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                            },
+                                                            child: const Text(
+                                                                "Delete"),
                                                           ),
-                                                          content:
-                                                              TextFormField(
-                                                            decoration:
-                                                                const InputDecoration(
-                                                                    hintText:
-                                                                        "Edit Message..."),
-                                                            textInputAction:
-                                                                TextInputAction
-                                                                    .next,
-                                                            keyboardType:
-                                                                TextInputType
-                                                                    .text,
-                                                            controller:
-                                                                editController,
+                                                        ],
+                                                      );
+                                                    },
+                                                  );
+                                                }
+                                                if (val == 'edit') {
+                                                  return showDialog(
+                                                    context: context,
+                                                    builder: (context) {
+                                                      return AlertDialog(
+                                                        title: const Text(
+                                                            "Edit Message"),
+                                                        content: TextFormField(
+                                                          decoration:
+                                                              const InputDecoration(
+                                                            border:
+                                                                OutlineInputBorder(),
+                                                            hintText:
+                                                                "Edit message...",
                                                           ),
-                                                          actions: [
-                                                            ElevatedButton(
-                                                              onPressed: () {
-                                                                Navigator.of(
-                                                                        context)
-                                                                    .pop();
-                                                                editController
-                                                                    .clear();
-                                                              },
-                                                              child: const Text(
-                                                                "Cancel",
-                                                              ),
+                                                          textInputAction:
+                                                              TextInputAction
+                                                                  .next,
+                                                          keyboardType:
+                                                              TextInputType
+                                                                  .text,
+                                                          controller:
+                                                              editController,
+                                                        ),
+                                                        actions: [
+                                                          ElevatedButton(
+                                                            onPressed: () {
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                              editController
+                                                                  .clear();
+                                                            },
+                                                            child: const Text(
+                                                              "Cancel",
                                                             ),
-                                                            ElevatedButton(
-                                                              onPressed: () {
-                                                                FireStoreHelper
-                                                                    .fireStoreHelper
-                                                                    .updateMessage(
-                                                                  msg:
-                                                                      editController
-                                                                          .text,
-                                                                  receiveremail:
-                                                                      receiverEmail[
-                                                                          'email'],
-                                                                  messageDocId:
-                                                                      allMessages[
-                                                                              i]
-                                                                          .id,
-                                                                );
-                                                                Navigator.of(
-                                                                        context)
-                                                                    .pop();
-                                                                editController
-                                                                    .clear();
-                                                              },
-                                                              child: const Text(
-                                                                "Edit",
-                                                              ),
+                                                          ),
+                                                          ElevatedButton(
+                                                            onPressed: () {
+                                                              FireStoreHelper
+                                                                  .fireStoreHelper
+                                                                  .updateMessage(
+                                                                msg:
+                                                                    editController
+                                                                        .text,
+                                                                receiveremail:
+                                                                    receiverEmail[
+                                                                        'email'],
+                                                                messageDocId:
+                                                                    allMessages[
+                                                                            i]
+                                                                        .id,
+                                                              );
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                              editController
+                                                                  .clear();
+                                                            },
+                                                            child: const Text(
+                                                              "Edit",
                                                             ),
-                                                          ],
-                                                        );
-                                                      },
-                                                    );
-                                                  }
-                                                },
-                                                itemBuilder: (context) => [
-                                                  const PopupMenuItem(
-                                                    value: 'delete',
-                                                    child: Text('Delete'),
-                                                  ),
-                                                  const PopupMenuItem(
-                                                    value: 'edit',
-                                                    child: Text('Edit'),
-                                                  ),
-                                                ],
-                                                position:
-                                                    PopupMenuPosition.under,
-                                                child: Chip(
-                                                  label: Text(
-                                                    "${allMessages[i].data()['msg']}",
-                                                  ),
+                                                          ),
+                                                        ],
+                                                      );
+                                                    },
+                                                  );
+                                                }
+                                              },
+                                              itemBuilder: (context) => [
+                                                const PopupMenuItem(
+                                                  value: 'delete',
+                                                  child: Text('Delete'),
+                                                ),
+                                                const PopupMenuItem(
+                                                  value: 'edit',
+                                                  child: Text('Edit'),
+                                                ),
+                                              ],
+                                              position: PopupMenuPosition.under,
+                                              child: Text(
+                                                "${allMessages[i].data()['msg']}",
+                                                style: const TextStyle(
+                                                  fontSize: 16,
                                                 ),
                                               ),
-                                      ],
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              "08:10",
+                                              style: const TextStyle(
+                                                color: Colors.grey,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     );
                                   },
                                 );
@@ -268,14 +327,6 @@ class _ChatAppState extends State<ChatApp> {
                               receiverEmail: receiverEmail['email'],
                             );
                             chatController.clear();
-
-                            await FcmNotificationHelper.fcmNotificationHelper
-                                .sendFCM(
-                              title: msg,
-                              body:
-                                  Auth_Helper.firebaseAuth.currentUser!.email!,
-                              token: receiverEmail['token'],
-                            );
                           }
                         : null,
                     icon: Icon(

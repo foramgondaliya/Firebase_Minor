@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:firebase_chat_app/Provider/Theme_Provider.dart';
 import 'package:firebase_chat_app/Screens/HomePage.dart';
 import 'package:firebase_chat_app/Screens/Login_page.dart';
 import 'package:firebase_chat_app/Screens/chat_app.dart';
@@ -9,6 +10,7 @@ import 'package:firebase_chat_app/helper/local_notification.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 @pragma('vm:entry-point')
 Future<void> onBGFCM(RemoteMessage remoteMessage) async {
@@ -40,7 +42,28 @@ void main() async {
 
   FirebaseMessaging.onBackgroundMessage(onBGFCM);
   runApp(
-    MaterialApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => ThemeProvider(),
+        ),
+      ],
+      child: MyApp(),
+    ),
+  );
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      themeMode: (Provider.of<ThemeProvider>(context).isDarkTheme)
+          ? ThemeMode.dark
+          : ThemeMode.light,
       debugShowCheckedModeBanner: false,
       initialRoute: 'splash_Screen',
       routes: {
@@ -49,6 +72,6 @@ void main() async {
         'ChatApp': (context) => ChatApp(),
         'splash_Screen': (context) => SplashScreen(),
       },
-    ),
-  );
+    );
+  }
 }

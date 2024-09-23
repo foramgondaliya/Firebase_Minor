@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class AuthProvider with ChangeNotifier {
   User? user;
@@ -19,14 +19,22 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen>
+    with TickerProviderStateMixin {
   late Timer timer;
+  late AnimationController controller;
 
   @override
   void initState() {
     super.initState();
+
+    controller = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..forward();
+
     timer = Timer.periodic(
-      const Duration(seconds: 3),
+      const Duration(seconds: 4),
       (timer) {
         (FirebaseAuth.instance.currentUser != null)
             ? Navigator.of(context).pushReplacementNamed("/")
@@ -37,10 +45,34 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
+      backgroundColor: Colors.white,
       body: Center(
-        child: CircularProgressIndicator(),
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0.5, end: 1.0), // Scaling the logo
+          duration: const Duration(seconds: 2),
+          builder: (context, scale, child) {
+            return Transform.scale(
+              scale: scale,
+              child: child,
+            );
+          },
+          child: Container(
+            height: 200,
+            width: 200,
+            child: Image.asset(
+              fit: BoxFit.cover,
+              "assets/image/logo.webp",
+            ),
+          ),
+        ),
       ),
     );
   }

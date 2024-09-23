@@ -31,7 +31,7 @@ class _HomePageState extends State<HomePage> {
               Navigator.of(context)
                   .pushNamedAndRemoveUntil('Login_Page', (routs) => false);
             },
-            icon: Icon(Icons.power_settings_new),
+            icon: Icon(Icons.logout),
           ),
         ],
       ),
@@ -61,16 +61,44 @@ class _HomePageState extends State<HomePage> {
                   },
                   itemCount: allDocs.length,
                   itemBuilder: (context, i) {
+                    String receiverEmail = allDocs[i].data()['email'];
+
                     return (Auth_Helper.firebaseAuth.currentUser!.email ==
-                            allDocs[i].data()['email'])
+                            receiverEmail)
                         ? Container()
                         : Card(
                             elevation: 4,
                             child: ListTile(
                               leading: CircleAvatar(
-                                radius: 20,
+                                radius: 25,
+                                backgroundColor: Colors.blue.shade100,
+                                child: Text(
+                                  receiverEmail[0].toUpperCase(),
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blueAccent,
+                                  ),
+                                ),
                               ),
-                              title: Text("${allDocs[i].data()['email']}"),
+                              title: Text(receiverEmail),
+                              subtitle: StreamBuilder<String>(
+                                stream: FireStoreHelper.fireStoreHelper
+                                    .getLastMessageTimeStream(receiverEmail),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return Text("Loading...");
+                                  } else if (snapshot.hasError) {
+                                    return Text("Error: ${snapshot.error}");
+                                  } else if (snapshot.hasData) {
+                                    return Text(
+                                        "Last message: ${snapshot.data}");
+                                  } else {
+                                    return Text("No messages yet");
+                                  }
+                                },
+                              ),
                               trailing: IconButton(
                                 icon: Icon(Icons.delete),
                                 onPressed: () async {

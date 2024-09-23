@@ -45,27 +45,27 @@ class _Login_PageState extends State<Login_Page> with WidgetsBindingObserver {
     requestPermission();
   }
 
-  // @override
-  // void didChangeAppLifecycleState(AppLifecycleState state) {
-  //   super.didChangeAppLifecycleState(state);
-  //
-  //   log("============================");
-  //   log("${state}");
-  //   log("============================");
-  //
-  //   switch (state) {
-  //     case AppLifecycleState.paused:
-  //       log("paused");
-  //       break;
-  //     case AppLifecycleState.resumed:
-  //       log("resumed");
-  //       break;
-  //     case AppLifecycleState.detached:
-  //       log("detached");
-  //       break;
-  //     default:
-  //   }
-  // }
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    log("============================");
+    log("${state}");
+    log("============================");
+
+    switch (state) {
+      case AppLifecycleState.paused:
+        log("paused");
+        break;
+      case AppLifecycleState.resumed:
+        log("resumed");
+        break;
+      case AppLifecycleState.detached:
+        log("detached");
+        break;
+      default:
+    }
+  }
 
   Future<void> requestPermission() async {
     PermissionStatus notificationPermissionStatus =
@@ -79,208 +79,158 @@ class _Login_PageState extends State<Login_Page> with WidgetsBindingObserver {
     return Scaffold(
       body: Container(
         alignment: Alignment.center,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  height: 250,
-                  width: 350,
-                  decoration: BoxDecoration(
-                    //color: Colors.red,
-                    image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: NetworkImage(
-                        "https://img.freepik.com/premium-vector/group-people-phone-chatting-discusses-project-group-conversation-online-chat_530733-2303.jpg",
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    height: MediaQuery.of(context).size.height *
+                        0.3, // 30% of screen height
+                    width: MediaQuery.of(context).size.width *
+                        0.9, // 90% of screen width
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        fit: BoxFit.cover,
+                        image: NetworkImage(
+                          "https://img.freepik.com/premium-vector/group-people-phone-chatting-discusses-project-group-conversation-online-chat_530733-2303.jpg",
+                        ),
                       ),
                     ),
                   ),
-                )
-              ],
-            ),
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.spaceAround,
-            //   children: [
-            //     IconButton(
-            //       onPressed: () async {
-            //         String title = "Welcome!";
-            //         String description = "new messages.";
-            //
-            //         await LocalNotificationHelper.localNotificationHelper
-            //             .showSimpleNotification(title: title, dis: description);
-            //       },
-            //       icon: Icon(Icons.add),
-            //     ),
-            //     IconButton(
-            //       onPressed: () async {
-            //         await LocalNotificationHelper.localNotificationHelper
-            //             .showBigPictureNotification();
-            //       },
-            //       icon: Icon(Icons.apps),
-            //     ),
-            //     IconButton(
-            //       onPressed: () async {
-            //         await LocalNotificationHelper.localNotificationHelper
-            //             .showMediaStyleNotification();
-            //       },
-            //       icon: Icon(Icons.ac_unit),
-            //     ),
-            //     IconButton(
-            //       onPressed: () async {
-            //         print('hello');
-            //         await LocalNotificationHelper.localNotificationHelper
-            //             .showScheduledNotification();
-            //       },
-            //       icon: Icon(Icons.notification_add),
-            //     ),
-            //   ],
-            // ),
-            SizedBox(
-              height: 70,
-            ),
-            Column(
-              children: [
-                Container(
-                  height: 65,
-                  width: 350,
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                ],
+              ),
+              SizedBox(height: 70),
+              Column(
+                children: [
+                  Container(
+                    height: 65,
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                    ),
-                    onPressed: () async {
-                      Map<String, dynamic> res =
-                          await Auth_Helper.auth_helper.signInAsGuestUser();
+                      onPressed: () async {
+                        Map<String, dynamic> res =
+                            await Auth_Helper.auth_helper.signInAsGuestUser();
 
-                      if (res['user'] != null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text("Sign in Successfully..."),
-                            backgroundColor: Colors.green,
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                        Navigator.of(context)
-                            .pushReplacementNamed('/', arguments: res['user']);
-                      } else if (res['error'] != null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text("${res['error']}"),
-                            backgroundColor: Colors.red,
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text("Sign in Failed..."),
-                            backgroundColor: Colors.red,
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      }
-                    },
-                    child: Text(
-                      "Guest Login",
+                        if (res['user'] != null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("Sign in Successfully..."),
+                              backgroundColor: Colors.green,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                          Navigator.of(context).pushReplacementNamed('/',
+                              arguments: res['user']);
+                        } else if (res['error'] != null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("${res['error']}"),
+                              backgroundColor: Colors.red,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("Sign in Failed..."),
+                              backgroundColor: Colors.red,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                      },
+                      child: Text("Guest Login"),
                     ),
                   ),
-                ),
-                SizedBox(
-                  height: 15,
-                ),
-                Container(
-                  height: 65,
-                  width: 350,
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  SizedBox(height: 15),
+                  Container(
+                    height: 65,
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
+                      onPressed: () {
+                        validateAndSignInUser();
+                      },
+                      child: Text("Sign In"),
                     ),
+                  ),
+                  SizedBox(height: 15),
+                  Container(
+                    height: 65,
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () async {
+                        Map<String, dynamic> res =
+                            await Auth_Helper.auth_helper.signInWithGoogle();
+
+                        if (res['user'] != null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("Sign in Successfully..."),
+                              backgroundColor: Colors.green,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                          User user = res['user'];
+                          await FireStoreHelper.fireStoreHelper
+                              .addAuthenticatedUser(email: user.email!);
+
+                          Navigator.of(context).pushReplacementNamed('/',
+                              arguments: res['user']);
+                        } else if (res['error'] != null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("${res['error']}"),
+                              backgroundColor: Colors.red,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("Sign in Failed..."),
+                              backgroundColor: Colors.red,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                      },
+                      child: Text("Sign In With Google"),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("Don't have an account?"),
+                  TextButton(
                     onPressed: () {
-                      validateAndSignInUser();
+                      validateAndSignUpUser();
                     },
-                    child: Text(
-                      "Sign In",
-                    ),
+                    child: Text("Sign Up"),
                   ),
-                ),
-                SizedBox(
-                  height: 15,
-                ),
-                Container(
-                  height: 65,
-                  width: 350,
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () async {
-                      Map<String, dynamic> res =
-                          await Auth_Helper.auth_helper.signInWithGoogle();
-
-                      if (res['user'] != null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text("Sign in Successfully..."),
-                            backgroundColor: Colors.green,
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                        User user = res['user'];
-                        // FirebaseModel firebaseModel = FirebaseModel(email: email!);
-
-                        await FireStoreHelper.fireStoreHelper
-                            .addAuthenticatedUser(email: user.email!);
-
-                        Navigator.of(context)
-                            .pushReplacementNamed('/', arguments: res['user']);
-                      } else if (res['error'] != null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text("${res['error']}"),
-                            backgroundColor: Colors.red,
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text("Sign in Failed..."),
-                            backgroundColor: Colors.red,
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      }
-                    },
-                    child: Text(
-                      "Sign In With Google",
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 70,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text("Don't have an account?"),
-                TextButton(
-                  onPressed: () {
-                    validateAndSignUpUser();
-                  },
-                  child: Text("Sign Up"),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

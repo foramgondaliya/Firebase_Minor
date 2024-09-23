@@ -211,4 +211,42 @@ class FireStoreHelper {
       "updatedTimeStamp": FieldValue.serverTimestamp(),
     });
   }
+
+  Stream<String> getLastMessageTimeStream(String receiverEmail) async* {
+    String senderEmail = Auth_Helper.firebaseAuth.currentUser!.email!;
+
+    QuerySnapshot<Map<String, dynamic>> querySnapshot =
+        await db.collection("chatrooms").get();
+
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> allChatrooms =
+        querySnapshot.docs;
+
+    String? chatroomId;
+
+    for (var chatroom in allChatrooms) {
+      List users = chatroom.data()['users'];
+      if (users.contains(receiverEmail) && users.contains(senderEmail)) {
+        chatroomId = chatroom.id;
+        break;
+      }
+    }
+
+    if (chatroomId == null) yield "No messages";
+    yield* db
+        .collection("chatrooms")
+        .doc(chatroomId)
+        .collection("messages")
+        .orderBy("timestamp", descending: true)
+        .limit(1)
+        .snapshots()
+        .map((snapshot) {
+      if (snapshot.docs.isEmpty) {
+        return "No messages";
+      }
+      var lastMessage = snapshot.docs.first.data();
+      Timestamp timestamp = lastMessage['timestamp'];
+      DateTime date = timestamp.toDate();
+      return " ${date.hour} : ${date.minute}";
+    });
+  }
 }

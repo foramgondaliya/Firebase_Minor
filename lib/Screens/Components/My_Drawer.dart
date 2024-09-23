@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_chat_app/Provider/Theme_Provider.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_chat_app/helper/Auth_Helper.dart';
+import 'package:provider/provider.dart';
 
 class My_Drawer extends StatefulWidget {
   final User user;
@@ -34,20 +36,17 @@ class _My_DrawerState extends State<My_Drawer> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           DrawerHeader(
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
-            ),
+            decoration: BoxDecoration(color: Colors.blue),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 CircleAvatar(
                   radius: 40,
-                  backgroundImage: (widget.user.isAnonymous)
-                      ? null
-                      : (widget.user.photoURL == null)
-                          ? AssetImage('assets/default_avatar.png')
-                          : NetworkImage(widget.user.photoURL!)
-                              as ImageProvider,
+                  backgroundImage: (widget.user.isAnonymous ||
+                          widget.user.photoURL == null)
+                      ? AssetImage('assets/image/img.jpg')
+                      : NetworkImage(widget.user.photoURL!) as ImageProvider,
+                  backgroundColor: Colors.transparent,
                 ),
                 SizedBox(height: 10),
                 if (!widget.user.isAnonymous)
@@ -61,39 +60,92 @@ class _My_DrawerState extends State<My_Drawer> {
               ],
             ),
           ),
-          ListTile(
-            leading: Icon(Icons.person),
-            title: Text(
-              (widget.user.isAnonymous)
-                  ? "Guest Login"
-                  : "Username: ${userName ?? 'Unknown'}",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
+          SizedBox(
+            height: 3,
+          ),
+          Card(
+            child: ListTile(
+              leading: Icon(Icons.person),
+              title: Text(
+                (widget.user.isAnonymous)
+                    ? "Guest Login"
+                    : "Username: ${userName ?? 'Unknown'}",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              trailing: IconButton(
+                icon: Icon(Icons.edit),
+                onPressed: () {
+                  AlertBox();
+                },
               ),
             ),
-            trailing: IconButton(
-              icon: Icon(Icons.edit),
-              onPressed: () {
-                AlertBox();
-              },
-            ),
+          ),
+          SizedBox(
+            height: 3,
           ),
           (widget.user.isAnonymous || isGoogle())
               ? Container()
-              : ListTile(
-                  leading: Icon(
-                    Icons.lock,
-                  ),
-                  title: Text(
-                    "Change Password",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
+              : Card(
+                  child: ListTile(
+                    leading: Icon(
+                      Icons.lock,
                     ),
+                    title: Text(
+                      "Change Password",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    onTap: () {
+                      AlertPassword();
+                    },
                   ),
-                  onTap: () {
-                    AlertPassword();
-                  },
                 ),
+          SizedBox(
+            height: 3,
+          ),
+          Card(
+            child: ListTile(
+              leading: Icon(
+                Icons.dark_mode,
+              ),
+              title: Text(
+                "Change Theme",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onTap: () {
+                Provider.of<ThemeProvider>(context, listen: false)
+                    .changetheme();
+              },
+            ),
+          ),
+          SizedBox(
+            height: 3,
+          ),
+          Card(
+            child: ListTile(
+              leading: Icon(
+                Icons.logout,
+                color: Colors.red,
+              ),
+              title: Text(
+                "Logout",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                ),
+              ),
+              onTap: () async {
+                await Auth_Helper.auth_helper.SignOutUser();
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil('Login_Page', (routs) => false);
+              },
+            ),
+          )
         ],
       ),
     );
