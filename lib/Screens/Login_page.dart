@@ -49,7 +49,7 @@ class _Login_PageState extends State<Login_Page> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
 
-    log("============================");
+    log("==========================");
     log("${state}");
     log("============================");
 
